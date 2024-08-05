@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protfolio</title>
+</head>
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "Poppins", sans-serif;
+    }
+    
+    .overflow_hidden {
+        overflow: hidden;
+    }
+
+    .scrollBar_hidden::-webkit-scrollbar {
+        display: none;
+    }
+
+    .flex {
+        display: flex;
+    }
+
+    .projects-tileView {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding-inline: 10px;
+        user-select: none;
+    }
+
+    .project {
+        width: 20%;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .project .thumbnail {
+        width: 100%;
+    }
+
+    .project .thumbnail img {
+        width: 100%;
+        aspect-ratio: 13 / 9;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .project .name {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .project .last-modified {
+        font-style: italic;
+        font-size: 0.8rem;
+    }
+
+    /* pop-up container */
+    .popup_container {
+        position: sticky;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .popup_content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        min-width: 150px;
+        width: calc(100vw - 15px);
+        min-height: 150px;
+        height: calc(100vh - 15px);
+        background: #fff;
+        border-radius: 10px;
+        animation: fadein .3s linear;
+        overflow: auto;
+    }
+
+    .onClose {
+        animation: scroll-up .3s linear forwards;
+    }
+
+    @keyframes scroll-up {
+        from {
+            top: 50%;
+        }
+        to {
+            top: -100%;
+        }
+    }
+
+    @keyframes fadein {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .popup_content .header {
+        position: sticky;
+        top: 0;
+        z-index: 9;
+        background: inherit;
+        justify-content: space-between;
+        align-items: center;
+        column-gap: 20px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .header .title{
+        font-size: 1.5rem;
+        font-weight: 300;
+    }
+
+    .header .close{
+        cursor: pointer;
+        padding: 10px 17px;
+        border-radius: 50%;
+        font-weight: 600;
+    }
+
+    .header .close:hover {
+        background: lightgray;
+        color: #fff;
+    }
+
+    .popup_content .content {
+        height: calc(100% - 75px);
+        padding: 15px;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: 0px solid black;
+        box-shadow: 0 0px 5px 2px rgba(0, 0, 0, 0.2);
+    }
+</style>
+<body>
+    <div class="projects-tileView">
+        <div class="project" data-projectUrl="./projects/Website/index.html" data-projectName="Website">
+            <div class="thumbnail">
+                <img src="assert/Website.png" alt="Thumbnail image" draggable="false">
+            </div>
+            <div class="name">Project 1</div>
+            <div class="last-modified">Project Type: Front End</div>
+       </div>
+       <div class="project" data-projectUrl="./projects/Carifer_task/index.html" data-projectName="Carifer_task">
+            <div class="thumbnail">
+                <img src="assert/Carifer_task.png" alt="Thumbnail image" draggable="false">
+            </div>
+            <div class="name">Project 2</div>
+            <div class="last-modified">Project Type: Front End</div>
+        </div>
+       <div class="project" data-projectUrl="./projects/Carifer_task/index.html" data-projectName="Carifer_task">
+            <div class="thumbnail">
+                <img src="assert/Carifer_task.png" alt="Thumbnail image" draggable="false">
+            </div>
+            <div class="name">Project 3</div>
+            <div class="last-modified">Project Type: Front End</div>
+        </div>
+    </div>
+    
+    <script>
+        function CreatePopup(title, content) {
+            const elements = `<div class="popup_content scrollBar_hidden">
+                                <div class="header flex">
+                                    <div class="title">${title}</div>
+                                    <div class="close">X</div>
+                                </div>
+                                <div class="content">
+                                    ${content}
+                                </div>
+                            </div>`;
+            
+            let popup_Container = document.createElement('div');
+            popup_Container.classList.add("popup_container");
+            popup_Container.innerHTML = elements;
+
+            function onClickClose() {
+                popup_Container.querySelector(".popup_content").classList.add("onClose")
+                setTimeout(()=>{
+                    popup_Container.removeEventListener("click", onClickClose);
+                    popup_Container.remove();
+                    document.querySelector("body").classList.remove("overflow_hidden");
+                }, 300)
+            }
+
+            // onclick remove the popup
+            body.classList.add("overflow_hidden");
+            popup_Container.querySelector(".close").addEventListener("click", onClickClose);
+
+            return popup_Container;
+        }
+
+        const body = document.querySelector("body");
+
+        document.querySelectorAll(".project").forEach(project => {
+            project.addEventListener("click", function(){
+                const projectUrl = this.getAttribute("data-projectUrl");
+                const projectName = this.getAttribute("data-projectName");
+
+                const projectPreview = document.createElement("iframe");
+                projectPreview.src = projectUrl;
+
+                const popup = CreatePopup(projectName, projectPreview.outerHTML);
+                body.append(popup)
+            })
+        })
+    </script>
+</body>
+</html>
